@@ -24,17 +24,33 @@ jobs:
         run: |-
           set -euo pipefail
 
+          echo "1"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d
+          echo "2"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/'
+          echo "3"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/' | awk '{print $2}'
+          echo "4"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/' | awk '{print $2}' | grep -Evi '\.md'
+          echo "5"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/' | awk '{print $2}' | grep -Evi '\.md' | while read -r dir; do if [[ "$(find "$(dirname "$dir")" -name '*.tf' 2>/dev/null | wc -l)" -gt 0 ]]; then dirname "$dir"; fi; done
+          echo "6"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/' | awk '{print $2}' | grep -Evi '\.md' | while read -r dir; do if [[ "$(find "$(dirname "$dir")" -name '*.tf' 2>/dev/null | wc -l)" -gt 0 ]]; then dirname "$dir"; fi; done | sort -u
+          echo "7"
+          git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d | grep -E 'projects/' | awk '{print $2}' | grep -Evi '\.md' | while read -r dir; do if [[ "$(find "$(dirname "$dir")" -name '*.tf' 2>/dev/null | wc -l)" -gt 0 ]]; then dirname "$dir"; fi; done | sort -u | jq -csR 'split("\n") | map(select(length > 0)) | map({project_dir: .})'
+          
           matrix=$(git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d \
             | grep -E 'projects/' \
             | awk '{print $2}' \
             | grep -Evi '\.md' \
-            | while read -r dir; do 
+            | while read -r dir; do
                 if [[ "$(find "$(dirname "$dir")" -name '*.tf' 2>/dev/null | wc -l)" -gt 0 ]]; then 
                     dirname "$dir";
                 fi; 
               done \
             | sort -u \
             | jq -csR 'split("\n") | map(select(length > 0)) | map({project_dir: .})')
+
           echo "::set-output name=matrix::${matrix}"
 
   terraform:
