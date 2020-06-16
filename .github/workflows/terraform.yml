@@ -7,7 +7,7 @@ on:
   pull_request: ~
 
 env:
-  is_production: ${{ github.ref == 'refs/head/master' && github.event_name == 'push' }}
+  is_production: ${{ github.ref == 'refs/head/master' }}
 
 jobs:
   collect_jobs:
