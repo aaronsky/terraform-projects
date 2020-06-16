@@ -39,18 +39,18 @@ jobs:
       - name: Format
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+        continue-on-error: env.is_production == 'true'
 
       - name: Initialize
         id: init
         run: terraform init -input=false
 
       - name: Set Workspace (development)
-        if: ${{ !env.is_production }}
+        if: env.is_production == 'false'
         run: terraform workspace select development || terraform workspace new development
 
       - name: Set Workspace (production)
-        if: ${{ env.is_production }}
+        if: env.is_production == 'true'
         run: |
           echo "$is_production"
           terraform workspace select production || terraform workspace new production
@@ -61,8 +61,8 @@ jobs:
 
       - name: Plan
         run: terraform plan -input=false
-        continue-on-error: ${{ !env.is_production }}
+        continue-on-error: env.is_production == 'false'
 
       - name: Apply
-        if: ${{ env.is_production }}
+        if: env.is_production == 'true'
         run: echo "terraform apply -input=false -auto-approve"
