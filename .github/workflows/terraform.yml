@@ -27,7 +27,6 @@ jobs:
         run: |-
           ref=$([ "$is_production" == "true" ] && echo "HEAD^" || echo "origin/master")
           matrix=$(./.github/workflows/scripts/collect_jobs.sh $ref)
-          echo "$matrix"
           echo "::set-output name=matrix::$matrix"
 
   terraform:
