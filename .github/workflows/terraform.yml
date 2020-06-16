@@ -46,10 +46,12 @@ jobs:
         run: terraform init -input=false
 
       - name: Set Workspace (development)
+        id: workspace-dev
         if: ${{ env.is_production == 'false' }}
         run: terraform workspace select development || terraform workspace new development
 
       - name: Set Workspace (production)
+        id: workspace-prod
         if: ${{ env.is_production == 'true' }}
         run: |
           echo "$is_production"
@@ -61,7 +63,6 @@ jobs:
 
       - name: Plan
         run: terraform plan -input=false
-        continue-on-error: ${{ env.is_production == 'false' }}
 
       - name: Apply
         if: ${{ env.is_production == 'true' }}
