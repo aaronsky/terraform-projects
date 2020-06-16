@@ -21,7 +21,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Collect Jobs
         id: set-matrix
-        run: echo "::set-output name=matrix::$(./.github/workflows/scripts/collect_jobs.sh)"
+        run: |-
+          ref=$([ "$is_production" == "true" ] && echo "HEAD^" || echo "origin/master")
+          echo "::set-output name=matrix::$(./.github/workflows/scripts/collect_jobs.sh $ref)"
 
   terraform:
     name: Terraform

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d |
+git diff-tree "$1" --no-commit-id --name-status -r HEAD --diff-filter d |
     grep -E 'projects/' |
     awk '{print $2}' |
     grep -Evi '\.md' |
