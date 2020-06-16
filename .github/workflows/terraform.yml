@@ -16,9 +16,12 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
+        if: ${{ env.is_production == 'false' }}
         with:
           ref: master
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
       - name: Collect Jobs
         id: set-matrix
         run: |-
