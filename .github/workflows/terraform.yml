@@ -1,0 +1,73 @@
+name: Terraform
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: ~
+
+env:
+  is_production: ${{ github.ref == 'refs/head/master' && github.event_name == 'push' }}
+
+jobs:
+  collect_jobs:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |-
+          matrix=$(git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d \
+            | grep -E 'projects/' \
+            | awk '{print $2}' \
+            | grep -Evi '\.md' \
+            | while read -r dir; do 
+                if [[ "$(find "$(dirname "$dir")" -name '*.tf' 2>/dev/null | wc -l)" -gt 0 ]]; then 
+                    dirname "$dir";
+                fi; 
+              done \
+            | sort -u \
+            | jq -csR 'split("\n") | map(select(length > 0)) | map({project_dir: .})')
+          echo "::set-output name=matrix::${matrix}"
+
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    needs: collect_jobs
+    defaults:
+      run:
+        working-directory: ${{ matrix.project_dir }}
+    strategy:
+      matrix: ${{ fromJson(needs.collect_jobs.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+
+      - name: Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Initialize
+        id: init
+        run: terraform init -input=false
+
+      - name: Set Workspace (development)
+        if: ${{ !env.is_production }}
+        run: terraform workspace select development || terraform workspace new development
+
+      - name: Set Workspace (production)
+        if: ${{ env.is_production }}
+        run: terraform workspace select production || terraform workspace new production
+
+      - name: Validate
+        id: validate
+        run: terraform validate
+
+      - name: Plan
+        run: terraform plan -input=false
+        continue-on-error: ${{ !env.is_production }}
+
+      - name: Apply
+        if: ${{ env.is_production }}
+        run: terraform apply -input=false -auto-approve
