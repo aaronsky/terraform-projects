@@ -15,6 +15,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+      - uses: actions/checkout@v2
       - id: set-matrix
         run: |-
           matrix=$(git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d \
