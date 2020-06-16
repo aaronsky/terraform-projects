@@ -10,4 +10,4 @@ git diff-tree "$1" --no-commit-id --name-status -r HEAD --diff-filter d |
         fi
     done |
     sort -u |
-    jq -csR 'split("\n") | map(select(length > 0)) | map({ os: "ubuntu-latest", project_dir: . }) | { os: [], include: . }'
+    jq -csR 'split("\n") | map(select(length > 0)) | map({ project_dir: . }) | { include: . }'
