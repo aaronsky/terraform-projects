@@ -16,11 +16,14 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
-      - id: set-matrix
+        with:
+          ref: master
+      - uses: actions/checkout@v2
+      - name: Collect Jobs
+        id: set-matrix
         run: |-
           set -euo pipefail
 
-          git fetch origin master
           matrix=$(git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d \
             | grep -E 'projects/' \
             | awk '{print $2}' \
