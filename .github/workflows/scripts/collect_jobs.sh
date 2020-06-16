@@ -10,4 +10,4 @@ git diff-tree origin/master --no-commit-id --name-status -r HEAD --diff-filter d
         fi
     done |
     sort -u |
-    jq -csR 'split("\n") | map(select(length > 0)) | map({project_dir: .})'
+    jq -csR 'split("\n") | map(select(length > 0)) | map({ project_dir: . }) | { include: . }'
