@@ -51,7 +51,9 @@ jobs:
 
       - name: Set Workspace (production)
         if: ${{ env.is_production }}
-        run: terraform workspace select production || terraform workspace new production
+        run: |
+          echo "$is_production"
+          terraform workspace select production || terraform workspace new production
 
       - name: Validate
         id: validate
@@ -63,4 +65,4 @@ jobs:
 
       - name: Apply
         if: ${{ env.is_production }}
-        run: terraform apply -input=false -auto-approve
+        run: echo "terraform apply -input=false -auto-approve"
